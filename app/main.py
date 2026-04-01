@@ -85,8 +85,12 @@ def set_security_headers(response):
         "max-age=63072000; includeSubDomains; preload"
     )
     response.headers["Content-Security-Policy"] = (
-        "default-src 'self'; style-src 'self' 'unsafe-inline'; "
-        "script-src 'self'; img-src 'self' data:; "
+        "default-src 'self'; "
+        "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; "
+        "font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; "
+        "script-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: https://images.unsplash.com; "
+        "connect-src 'self'; "
         "frame-ancestors 'self' https://*.hf.space https://huggingface.co;"
     )
     return response

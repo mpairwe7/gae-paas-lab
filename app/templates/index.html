@@ -3,86 +3,253 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PaaS Lab 2026 – Containerised Flask App</title>
+    <title>PaaS Lab 2026 - Containerised Flask App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #0f172a;
             color: #e2e8f0;
             min-height: 100vh;
-            display: flex; align-items: center; justify-content: center;
         }
-        .container {
-            max-width: 720px; width: 90%; padding: 2.5rem;
-            background: rgba(30, 41, 59, 0.85);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            border-radius: 1rem;
-            backdrop-filter: blur(12px);
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            min-height: 420px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
         }
-        h1 { font-size: 2rem; color: #818cf8; margin-bottom: 0.5rem; }
-        .subtitle { color: #94a3b8; margin-bottom: 1.5rem; }
-        .card {
-            background: rgba(15, 23, 42, 0.6); border-radius: 0.75rem;
-            padding: 1.25rem; margin-bottom: 1rem;
-            border-left: 3px solid #818cf8;
+        .hero-bg {
+            position: absolute; inset: 0;
+            background: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1400&q=80') center/cover no-repeat;
         }
-        .card h3 { color: #a5b4fc; margin-bottom: 0.4rem; font-size: 0.95rem; }
-        .card p { color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; }
+        .hero-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(15,23,42,0.92), rgba(99,102,241,0.4));
+        }
+        .hero-content {
+            position: relative; z-index: 1;
+            padding: 3rem 1.5rem;
+            max-width: 700px;
+        }
+        .hero-content h1 {
+            font-size: 2.6rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+        .hero-content h1 i { color: #a5b4fc; margin-right: 0.5rem; }
+        .hero-content p {
+            font-size: 1.1rem;
+            color: #cbd5e1;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        .hero-badges { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
         .badge {
-            display: inline-block; padding: 0.2rem 0.6rem;
-            background: rgba(34, 197, 94, 0.15); color: #4ade80;
-            border-radius: 999px; font-size: 0.75rem; font-weight: 600;
-            margin-right: 0.4rem;
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            padding: 0.35rem 0.85rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
         }
-        .badge.blue { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
-        .badge.amber { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
-        a.btn {
-            display: inline-block; margin-top: 1.5rem; padding: 0.75rem 1.5rem;
-            background: #6366f1; color: #fff; text-decoration: none;
-            border-radius: 0.5rem; font-weight: 600; transition: background 0.2s;
+        .badge.green { background: rgba(34,197,94,0.15); color: #4ade80; }
+        .badge.blue { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+        .badge.amber { background: rgba(245,158,11,0.15); color: #fbbf24; }
+        .btn-primary {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.85rem 2rem;
+            background: #6366f1;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 0.6rem;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: background 0.2s, transform 0.15s;
         }
-        a.btn:hover { background: #4f46e5; }
-        footer { margin-top: 1.5rem; font-size: 0.8rem; color: #64748b; }
+        .btn-primary:hover { background: #4f46e5; transform: translateY(-1px); }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            padding: 1rem;
+            background: rgba(30,41,59,0.9);
+            border-bottom: 1px solid rgba(99,102,241,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+        }
+        nav a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: color 0.2s;
+        }
+        nav a:hover, nav a.active { color: #a5b4fc; }
+
+        /* Feature Cards */
+        .features {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.25rem;
+        }
+        .card {
+            background: rgba(30,41,59,0.7);
+            border: 1px solid rgba(99,102,241,0.15);
+            border-radius: 0.85rem;
+            padding: 1.75rem;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .card:hover { transform: translateY(-3px); border-color: rgba(99,102,241,0.4); }
+        .card-icon {
+            width: 48px; height: 48px;
+            border-radius: 0.65rem;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .card-icon.indigo { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+        .card-icon.green { background: rgba(34,197,94,0.15); color: #4ade80; }
+        .card-icon.rose { background: rgba(244,63,94,0.15); color: #fb7185; }
+        .card-icon.cyan { background: rgba(6,182,212,0.15); color: #22d3ee; }
+        .card h3 {
+            color: #f1f5f9;
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .card p {
+            color: #94a3b8;
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+
+        /* Stats Bar */
+        .stats {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 1.5rem 3rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+        .stat {
+            background: rgba(30,41,59,0.5);
+            border: 1px solid rgba(99,102,241,0.1);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            text-align: center;
+        }
+        .stat i { font-size: 1.5rem; color: #818cf8; margin-bottom: 0.5rem; display: block; }
+        .stat .value { font-size: 1.4rem; font-weight: 700; color: #f1f5f9; }
+        .stat .label { font-size: 0.78rem; color: #64748b; margin-top: 0.2rem; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            border-top: 1px solid rgba(99,102,241,0.1);
+            color: #475569;
+            font-size: 0.8rem;
+        }
+        footer a { color: #818cf8; text-decoration: none; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>☁️ PaaS Lab {{ year }}</h1>
-        <p class="subtitle">Exploring Platform-as-a-Service with Docker Containers</p>
+    <nav>
+        <a href="/" class="active"><i class="fa-solid fa-house"></i> Home</a>
+        <a href="/greet"><i class="fa-solid fa-comment-dots"></i> Greeting</a>
+        <a href="/health"><i class="fa-solid fa-heart-pulse"></i> Health</a>
+        <a href="/api/analyse"><i class="fa-solid fa-code"></i> API</a>
+    </nav>
 
-        <div class="card">
-            <h3>🌍 Deployment Region</h3>
-            <p><strong>{{ region }}</strong> — selected for low-carbon energy sourcing</p>
-            <span class="badge">Sustainable</span>
-            <span class="badge blue">Containerised</span>
-            <span class="badge amber">Portable</span>
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1><i class="fa-solid fa-cloud"></i> PaaS Lab {{ year }}</h1>
+            <p>Exploring Platform-as-a-Service with containerised Flask applications.
+               Built for the cloud, runs everywhere.</p>
+            <div class="hero-badges">
+                <span class="badge green"><i class="fa-solid fa-leaf"></i> Sustainable</span>
+                <span class="badge blue"><i class="fa-brands fa-docker"></i> Containerised</span>
+                <span class="badge amber"><i class="fa-solid fa-shuffle"></i> Portable</span>
+            </div>
+            <a class="btn-primary" href="/greet">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Try Smart Greeting
+            </a>
         </div>
+    </section>
 
+    <section class="features">
         <div class="card">
-            <h3>🤖 Sentiment Analysis</h3>
-            <p>This app performs sentiment analysis and generates dynamic
-               greetings — easily extensible with any AI/ML service
-               (OpenAI, Hugging Face, Ollama, etc.).</p>
+            <div class="card-icon indigo"><i class="fa-solid fa-globe"></i></div>
+            <h3>Deployment Region</h3>
+            <p><strong>{{ region }}</strong> &mdash; strategically selected for low latency and low-carbon energy sourcing across the APAC region.</p>
         </div>
-
         <div class="card">
-            <h3>🔒 Zero-Trust Security</h3>
-            <p>Strict HTTP security headers, non-root container user,
-               and encryption-ready architecture for defence in depth.</p>
+            <div class="card-icon green"><i class="fa-solid fa-brain"></i></div>
+            <h3>Sentiment Analysis</h3>
+            <p>Real-time sentiment detection with keyword analysis. Plug in OpenAI, Hugging Face, or Ollama for production-grade AI.</p>
         </div>
-
         <div class="card">
-            <h3>🐳 Fully Containerised</h3>
-            <p>Docker-based deployment runs anywhere — local dev, Cloud Run,
-               AWS ECS/Fargate, Azure Container Apps, or Kubernetes.</p>
+            <div class="card-icon rose"><i class="fa-solid fa-shield-halved"></i></div>
+            <h3>Zero-Trust Security</h3>
+            <p>Strict HTTP security headers, non-root container, HSTS preload, and CSP for defence-in-depth protection.</p>
         </div>
+        <div class="card">
+            <div class="card-icon cyan"><i class="fa-brands fa-docker"></i></div>
+            <h3>Fully Containerised</h3>
+            <p>Docker-based deployment runs anywhere &mdash; Cloud Run, AWS ECS, Azure Container Apps, or Kubernetes.</p>
+        </div>
+    </section>
 
-        <a class="btn" href="/greet">Try AI Greeting →</a>
+    <section class="stats">
+        <div class="stat">
+            <i class="fa-solid fa-server"></i>
+            <div class="value">Docker</div>
+            <div class="label">Runtime</div>
+        </div>
+        <div class="stat">
+            <i class="fa-brands fa-python"></i>
+            <div class="value">3.13</div>
+            <div class="label">Python Version</div>
+        </div>
+        <div class="stat">
+            <i class="fa-solid fa-location-dot"></i>
+            <div class="value">{{ region }}</div>
+            <div class="label">Region</div>
+        </div>
+        <div class="stat">
+            <i class="fa-solid fa-bolt"></i>
+            <div class="value">Gunicorn</div>
+            <div class="label">WSGI Server</div>
+        </div>
+    </section>
 
-        <footer>
-            <p>Lab Exercise — Cloud Computing {{ year }} | Containerised Flask Application</p>
-        </footer>
-    </div>
+    <footer>
+        <p>Lab Exercise &mdash; Cloud Computing {{ year }}
+           | <a href="https://github.com" target="_blank"><i class="fa-brands fa-github"></i> Source</a>
+        </p>
+    </footer>
 </body>
 </html>

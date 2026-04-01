@@ -3,51 +3,266 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Greeting – PaaS Lab</title>
+    <title>Smart Greeting - PaaS Lab</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: linear-gradient(135deg, #0f172a, #1e293b);
-            color: #e2e8f0; min-height: 100vh;
-            display: flex; align-items: center; justify-content: center;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            padding: 1rem;
+            background: rgba(30,41,59,0.9);
+            border-bottom: 1px solid rgba(99,102,241,0.2);
+            backdrop-filter: blur(10px);
+        }
+        nav a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: color 0.2s;
+        }
+        nav a:hover, nav a.active { color: #a5b4fc; }
+
+        .page {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
         }
         .container {
-            max-width: 520px; width: 90%; padding: 2.5rem;
-            background: rgba(30, 41, 59, 0.85);
-            border: 1px solid rgba(99, 102, 241, 0.3);
+            max-width: 520px;
+            width: 100%;
+            background: rgba(30,41,59,0.8);
+            border: 1px solid rgba(99,102,241,0.2);
             border-radius: 1rem;
+            overflow: hidden;
         }
-        h2 { color: #818cf8; margin-bottom: 0.5rem; }
-        p { color: #94a3b8; margin-bottom: 1.5rem; font-size: 0.9rem; }
-        label { display: block; margin-bottom: 0.5rem; color: #a5b4fc; font-weight: 600; }
+
+        .form-header {
+            position: relative;
+            padding: 2rem 2rem 1.5rem;
+            background: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80') center/cover no-repeat;
+        }
+        .form-header::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(15,23,42,0.9), rgba(99,102,241,0.5));
+        }
+        .form-header-content {
+            position: relative;
+            z-index: 1;
+        }
+        .form-header h2 {
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .form-header h2 i { color: #a5b4fc; }
+        .form-header p {
+            color: #cbd5e1;
+            font-size: 0.88rem;
+            line-height: 1.5;
+        }
+
+        .form-body {
+            padding: 1.75rem 2rem 2rem;
+        }
+        label {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-bottom: 0.6rem;
+            color: #a5b4fc;
+            font-weight: 600;
+            font-size: 0.88rem;
+        }
+        label i { font-size: 0.85rem; }
+        .input-wrap {
+            position: relative;
+            margin-bottom: 0.35rem;
+        }
+        .input-wrap i.input-icon {
+            position: absolute;
+            left: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #475569;
+            font-size: 0.9rem;
+        }
         input[type="text"] {
-            width: 100%; padding: 0.75rem 1rem; border-radius: 0.5rem;
-            border: 1px solid #475569; background: #0f172a; color: #e2e8f0;
-            font-size: 1rem; margin-bottom: 1rem;
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
-        input[type="text"]:focus { outline: none; border-color: #6366f1; }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+        }
+        .char-count {
+            text-align: right;
+            font-size: 0.75rem;
+            color: #475569;
+            margin-bottom: 1.25rem;
+        }
+        .char-count.warning { color: #f59e0b; }
+        .char-count.danger { color: #ef4444; }
         button {
-            padding: 0.75rem 1.5rem; background: #6366f1; color: #fff;
-            border: none; border-radius: 0.5rem; font-size: 1rem;
-            font-weight: 600; cursor: pointer; transition: background 0.2s;
+            width: 100%;
+            padding: 0.85rem;
+            background: #6366f1;
+            color: #fff;
+            border: none;
+            border-radius: 0.5rem;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: background 0.2s, transform 0.15s;
         }
-        button:hover { background: #4f46e5; }
-        a { color: #818cf8; text-decoration: none; font-size: 0.85rem; }
+        button:hover { background: #4f46e5; transform: translateY(-1px); }
+        button:active { transform: translateY(0); }
+        .suggestions {
+            margin-top: 1.25rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid rgba(99,102,241,0.1);
+        }
+        .suggestions p {
+            font-size: 0.78rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+        .chip {
+            padding: 0.3rem 0.7rem;
+            background: rgba(99,102,241,0.1);
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 999px;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .chip:hover { background: rgba(99,102,241,0.2); color: #e2e8f0; }
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-top: 1.5rem;
+            color: #818cf8;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #a5b4fc; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>🤖 Smart Greeting</h2>
-        <p>Enter your name or a message and our sentiment analyser will
-           craft a personalised greeting.</p>
-        <form method="POST" action="/greet">
-            <label for="name">Your name or message</label>
-            <input type="text" id="name" name="name" placeholder="e.g., I'm excited to learn cloud computing!" required maxlength="200" autocomplete="off">
-            <button type="submit">Generate Greeting</button>
-        </form>
-        <br>
-        <a href="/">← Back to Home</a>
+    <nav>
+        <a href="/"><i class="fa-solid fa-house"></i> Home</a>
+        <a href="/greet" class="active"><i class="fa-solid fa-comment-dots"></i> Greeting</a>
+        <a href="/health"><i class="fa-solid fa-heart-pulse"></i> Health</a>
+        <a href="/api/analyse"><i class="fa-solid fa-code"></i> API</a>
+    </nav>
+
+    <div class="page">
+        <div class="container">
+            <div class="form-header">
+                <div class="form-header-content">
+                    <h2><i class="fa-solid fa-wand-magic-sparkles"></i> Smart Greeting</h2>
+                    <p>Enter your name or a message and our sentiment analyser will craft a personalised greeting for you.</p>
+                </div>
+            </div>
+            <div class="form-body">
+                <form method="POST" action="/greet" id="greetForm">
+                    <label for="name"><i class="fa-solid fa-pen"></i> Your name or message</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-user input-icon"></i>
+                        <input type="text" id="name" name="name" placeholder="e.g., I'm excited to learn cloud computing!" required maxlength="200" autocomplete="off">
+                    </div>
+                    <div class="char-count"><span id="charCount">0</span> / 200</div>
+                    <button type="submit">
+                        <i class="fa-solid fa-paper-plane"></i> Generate Greeting
+                    </button>
+                </form>
+
+                <div class="suggestions">
+                    <p><i class="fa-solid fa-lightbulb"></i> Try these:</p>
+                    <div class="suggestion-chips">
+                        <span class="chip" data-text="I'm thrilled to explore PaaS!">Thrilled</span>
+                        <span class="chip" data-text="Cloud computing is amazing">Amazing</span>
+                        <span class="chip" data-text="Just curious about containers">Curious</span>
+                        <span class="chip" data-text="Frustrated with deployments">Frustrated</span>
+                    </div>
+                </div>
+
+                <a href="/" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+            </div>
+        </div>
     </div>
+
+    <script>
+        const input = document.getElementById('name');
+        const counter = document.getElementById('charCount');
+        const counterWrap = counter.parentElement;
+
+        input.addEventListener('input', function() {
+            const len = this.value.length;
+            counter.textContent = len;
+            counterWrap.className = 'char-count' + (len >= 180 ? ' danger' : len >= 150 ? ' warning' : '');
+        });
+
+        document.querySelectorAll('.chip').forEach(chip => {
+            chip.addEventListener('click', function() {
+                input.value = this.dataset.text;
+                input.dispatchEvent(new Event('input'));
+                input.focus();
+            });
+        });
+
+        document.getElementById('greetForm').addEventListener('submit', function() {
+            const btn = this.querySelector('button');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analysing...';
+            btn.disabled = true;
+        });
+    </script>
 </body>
 </html>
