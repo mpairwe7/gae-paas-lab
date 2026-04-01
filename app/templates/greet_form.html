@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Greeting – PaaS Lab</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #e2e8f0; min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .container {
+            max-width: 520px; width: 90%; padding: 2.5rem;
+            background: rgba(30, 41, 59, 0.85);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 1rem;
+        }
+        h2 { color: #818cf8; margin-bottom: 0.5rem; }
+        p { color: #94a3b8; margin-bottom: 1.5rem; font-size: 0.9rem; }
+        label { display: block; margin-bottom: 0.5rem; color: #a5b4fc; font-weight: 600; }
+        input[type="text"] {
+            width: 100%; padding: 0.75rem 1rem; border-radius: 0.5rem;
+            border: 1px solid #475569; background: #0f172a; color: #e2e8f0;
+            font-size: 1rem; margin-bottom: 1rem;
+        }
+        input[type="text"]:focus { outline: none; border-color: #6366f1; }
+        button {
+            padding: 0.75rem 1.5rem; background: #6366f1; color: #fff;
+            border: none; border-radius: 0.5rem; font-size: 1rem;
+            font-weight: 600; cursor: pointer; transition: background 0.2s;
+        }
+        button:hover { background: #4f46e5; }
+        a { color: #818cf8; text-decoration: none; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🤖 Smart Greeting</h2>
+        <p>Enter your name or a message and our sentiment analyser will
+           craft a personalised greeting.</p>
+        <form method="POST" action="/greet">
+            <label for="name">Your name or message</label>
+            <input type="text" id="name" name="name" placeholder="e.g., I'm excited to learn cloud computing!" required maxlength="200" autocomplete="off">
+            <button type="submit">Generate Greeting</button>
+        </form>
+        <br>
+        <a href="/">← Back to Home</a>
+    </div>
+</body>
+</html>

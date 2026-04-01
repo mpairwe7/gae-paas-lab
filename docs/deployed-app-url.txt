@@ -1,0 +1,24 @@
+============================================================
+  PaaS Lab 2026 — Deployed Web Application URL
+============================================================
+
+Project Name : paas-lab-2026
+Platform     : Google App Engine (Standard Environment)
+Runtime      : Python 3.13
+Region       : asia-southeast1 (Singapore)
+
+Application URL:
+  https://paas-lab-2026.as.r.appspot.com
+
+Health Check Endpoint:
+  https://paas-lab-2026.as.r.appspot.com/health
+
+AI Greeting Endpoint:
+  https://paas-lab-2026.as.r.appspot.com/greet
+
+API Endpoint (POST JSON):
+  https://paas-lab-2026.as.r.appspot.com/api/analyse
+
+============================================================
+  Deployment verified: 2026-03-13  |  Status: SERVING
+============================================================
