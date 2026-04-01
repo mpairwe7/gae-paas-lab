@@ -78,7 +78,7 @@ def analyse_sentiment_and_greet(user_input: str) -> dict:
 def set_security_headers(response):
     """Apply defence-in-depth HTTP security headers."""
     response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-Frame-Options"] = "ALLOWALL"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "geolocation=(), camera=(), microphone=()"
     response.headers["Strict-Transport-Security"] = (
@@ -87,7 +87,7 @@ def set_security_headers(response):
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; style-src 'self' 'unsafe-inline'; "
         "script-src 'self'; img-src 'self' data:; "
-        "frame-ancestors 'none';"
+        "frame-ancestors 'self' https://*.hf.space https://huggingface.co;"
     )
     return response
 
