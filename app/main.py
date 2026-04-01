@@ -132,13 +132,28 @@ def health():
     })
 
 
-@app.route("/api/analyse", methods=["POST"])
+@app.route("/api/analyse", methods=["GET", "POST"])
 def api_analyse():
     """
     JSON API for sentiment analysis.
-    Accepts: {"text": "..."}
-    Returns: {"greeting": "...", "sentiment": "...", "ai_powered": bool}
+    GET  -> returns API usage documentation
+    POST -> Accepts: {"text": "..."}, Returns: {"greeting": "...", "sentiment": "...", "ai_powered": bool}
     """
+    if request.method == "GET":
+        return jsonify({
+            "endpoint": "/api/analyse",
+            "method": "POST",
+            "description": "Sentiment analysis and greeting generation API",
+            "request_body": {"text": "string (1-500 characters)"},
+            "response": {
+                "greeting": "string",
+                "sentiment": "positive | negative | neutral",
+                "ai_powered": "boolean",
+            },
+            "example": {
+                "curl": 'curl -X POST /api/analyse -H "Content-Type: application/json" -d \'{"text": "I love cloud computing!"}\''
+            },
+        })
     data = request.get_json(silent=True)
     if not data or "text" not in data:
         abort(400, description="JSON body with 'text' field required.")
