@@ -79,6 +79,13 @@ def build_report():
     pdf.set_font("Helvetica", "", 10)
     pdf.set_text_color(100, 100, 100)
     pdf.cell(0, 6, "Cloud Computing & Big Data - PaaS Lab Report", align="C", new_x="LMARGIN", new_y="NEXT")
+    pdf.ln(3)
+    pdf.set_font("Helvetica", "B", 11)
+    pdf.set_text_color(30, 41, 59)
+    pdf.cell(0, 6, "Mpairwe Lauben", align="C", new_x="LMARGIN", new_y="NEXT")
+    pdf.set_font("Helvetica", "", 10)
+    pdf.set_text_color(80, 80, 80)
+    pdf.cell(0, 6, "Reg No: 22/U/21345    |    Student No: 2200721345", align="C", new_x="LMARGIN", new_y="NEXT")
     pdf.cell(0, 6, "Date: April 3, 2026", align="C", new_x="LMARGIN", new_y="NEXT")
     pdf.ln(4)
 
