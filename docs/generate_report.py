@@ -3,6 +3,10 @@
 
 from fpdf import FPDF
 
+APP_URL = "https://remarkable-happiness-production.up.railway.app"
+GITHUB_URL = "https://github.com/mpairwe7/gae-paas-lab"
+RAILWAY_PROJECT = "https://railway.com/project/b5736bbf-b0f0-4010-ab18-f9f099d60666"
+
 
 class Report(FPDF):
     def header(self):
@@ -44,9 +48,17 @@ class Report(FPDF):
     def bullet(self, text):
         self.set_font("Helvetica", "", 10)
         self.set_text_color(50, 50, 50)
-        x = self.get_x()
         self.cell(6, 5.5, "-")
         self.multi_cell(0, 5.5, text)
+        self.ln(1)
+
+    def link_line(self, label, url):
+        self.set_font("Helvetica", "B", 10)
+        self.set_text_color(50, 50, 50)
+        self.cell(45, 5.5, label + ":")
+        self.set_font("Helvetica", "", 10)
+        self.set_text_color(99, 102, 241)
+        self.cell(0, 5.5, url, new_x="LMARGIN", new_y="NEXT")
         self.ln(1)
 
 
@@ -68,7 +80,17 @@ def build_report():
     pdf.set_text_color(100, 100, 100)
     pdf.cell(0, 6, "Cloud Computing & Big Data - PaaS Lab Report", align="C", new_x="LMARGIN", new_y="NEXT")
     pdf.cell(0, 6, "Date: April 3, 2026", align="C", new_x="LMARGIN", new_y="NEXT")
-    pdf.ln(6)
+    pdf.ln(4)
+
+    # ---- Deliverable Links ----
+    pdf.set_font("Helvetica", "B", 11)
+    pdf.set_text_color(30, 41, 59)
+    pdf.cell(0, 8, "Deliverable Links", new_x="LMARGIN", new_y="NEXT")
+    pdf.ln(1)
+    pdf.link_line("Live Application", APP_URL)
+    pdf.link_line("Source Code", GITHUB_URL)
+    pdf.link_line("Railway Dashboard", RAILWAY_PROJECT)
+    pdf.ln(2)
 
     # ---- 1. Deployment Process ----
     pdf.section_title("1. Deployment Process")
@@ -77,30 +99,30 @@ def build_report():
     pdf.body_text(
         "The application is a containerised Flask (Python 3.13) web application that performs keyword-based "
         "sentiment analysis and generates personalised greetings. It features a modern responsive UI, "
-        "a RESTful JSON API, and a PostgreSQL-backed persistence layer for full CRUD operations. "
+        "a RESTful JSON API, and a database-backed persistence layer for full CRUD operations. "
         "The application was originally deployed on Google App Engine and has been migrated to Railway "
         "to demonstrate PaaS portability."
     )
 
     pdf.subsection_title("1.2 Railway Deployment Steps")
-    pdf.bullet("Created a new project on Railway (railway.com) and linked the GitHub repository.")
-    pdf.bullet("Provisioned a Railway-managed PostgreSQL database add-on from the Railway dashboard.")
-    pdf.bullet("Railway automatically injected DATABASE_URL into the application's environment variables.")
+    pdf.bullet("Authenticated with Railway CLI using 'railway login' (browser-based OAuth).")
+    pdf.bullet("Created project 'remarkable-happiness' via 'railway init' and linked it with 'railway link'.")
     pdf.bullet("Configured railway.json with Dockerfile builder, health check path (/health), and restart policy.")
-    pdf.bullet("Pushed code to GitHub main branch, triggering Railway's automatic deployment pipeline.")
-    pdf.bullet("Railway built the Docker image, ran the container, and assigned a public URL.")
-    pdf.bullet("Verified the deployment by testing all endpoints: /, /greet, /health, /api/analyse, /logs.")
+    pdf.bullet("Deployed using 'railway up --detach' which uploaded the source and built the Docker image remotely.")
+    pdf.bullet("Assigned a public domain via 'railway domain': " + APP_URL)
+    pdf.bullet("Linked the service with 'railway service' and verified logs with 'railway logs'.")
+    pdf.bullet("Verified all endpoints: /, /greet, /health, /api/analyse, /logs, and CRUD API operations.")
 
     pdf.subsection_title("1.3 Environment Configuration")
     pdf.body_text(
-        "Sensitive data is managed exclusively through Railway's environment variable management system. "
-        "The following variables are configured in Railway's dashboard (never committed to source code):"
+        "Sensitive data is managed through Railway's environment variable management system. "
+        "The following variables are configured via Railway's dashboard (never committed to source code):"
     )
-    pdf.bullet("DATABASE_URL - Automatically injected by Railway's PostgreSQL plugin. "
-               "The app handles the postgres:// to postgresql:// prefix conversion required by SQLAlchemy.")
+    pdf.bullet("DATABASE_URL - For PostgreSQL connections. The app handles the postgres:// to postgresql:// "
+               "prefix conversion required by SQLAlchemy 2.x. Falls back to SQLite for free-tier deployments.")
     pdf.bullet("SECRET_KEY - A cryptographically random key for Flask session signing, set via Railway dashboard.")
-    pdf.bullet("DEPLOY_REGION - Set to 'railway-us' to reflect the deployment region.")
-    pdf.bullet("PORT - Automatically set by Railway; the app reads it dynamically via os.environ.get('PORT', 7860).")
+    pdf.bullet("DEPLOY_REGION - Set to 'railway-us' to reflect the Railway deployment region.")
+    pdf.bullet("PORT - Automatically set by Railway at runtime; the Dockerfile CMD reads it dynamically.")
     pdf.body_text(
         "No .env files or secrets are committed to version control. The .gitignore excludes .env files, "
         "and the application code uses os.environ.get() with safe defaults for local development."
@@ -111,8 +133,8 @@ def build_report():
 
     pdf.subsection_title("2.1 Schema Design")
     pdf.body_text(
-        "A Railway-managed PostgreSQL instance stores sentiment analysis logs. The schema consists of "
-        "a single table, sentiment_logs, defined via Flask-SQLAlchemy ORM:"
+        "The application uses Flask-SQLAlchemy ORM with support for both PostgreSQL (Railway managed) "
+        "and SQLite (fallback). The schema consists of a single table, sentiment_logs:"
     )
     pdf.set_font("Courier", "", 9)
     pdf.set_text_color(30, 41, 59)
@@ -134,18 +156,22 @@ def build_report():
     pdf.subsection_title("2.2 CRUD Operations")
     pdf.set_font("Helvetica", "", 10)
     pdf.set_text_color(50, 50, 50)
-    pdf.bullet("CREATE: Every POST to /greet or /api/analyse automatically stores the analysis in the database.")
-    pdf.bullet("READ: GET /logs renders an HTML dashboard; GET /api/logs returns JSON for all entries.")
+    pdf.bullet("CREATE: Every POST to /greet or /api/analyse stores the analysis in the database automatically.")
+    pdf.bullet("READ: GET /logs renders an HTML dashboard with all entries; GET /api/logs returns JSON.")
     pdf.bullet("UPDATE: PUT /api/logs/<id> accepts new input text, re-analyses sentiment, and updates the record.")
-    pdf.bullet("DELETE: DELETE /api/logs/<id> removes a record. The logs UI provides edit/delete buttons.")
+    pdf.bullet("DELETE: DELETE /api/logs/<id> removes a record. The logs UI provides edit and delete buttons.")
+    pdf.body_text(
+        "All CRUD operations were verified on the live deployment. Sample data is available in "
+        "docs/database-schema.sql in the repository."
+    )
 
     # ---- 3. Scalability ----
     pdf.section_title("3. Scalability Awareness")
 
     pdf.subsection_title("3.1 Railway's Pricing & Scaling Model")
     pdf.body_text(
-        "Railway uses a usage-based pricing model that charges per vCPU-second and per GB-hour of memory. "
-        "The Hobby plan ($5/month) includes $5 of resource credits. For a lightweight Flask app with "
+        "Railway uses a usage-based pricing model charging per vCPU-second and per GB-hour of memory. "
+        "The Hobby plan ($5/month) includes $5 of resource credits. For our lightweight Flask app with "
         "Gunicorn (2 workers, 4 threads), baseline costs are minimal ($0.50-2.00/month). "
         "If traffic increases significantly:"
     )
@@ -167,16 +193,19 @@ def build_report():
         "The repository uses a GitHub Actions workflow (.github/workflows/deploy.yml) that triggers "
         "on every push to the main branch. The pipeline has two stages:"
     )
-    pdf.bullet("Test stage: Installs dependencies, runs smoke tests against all endpoints (health check, "
-               "landing page, greeting form, sentiment API, logs page, and CRUD API). "
+    pdf.bullet("Test stage: Installs Python 3.13 dependencies, runs smoke tests against all endpoints "
+               "(health check, landing page, greeting form, sentiment API, logs page, and CRUD API). "
                "Tests verify HTTP status codes and response data correctness.")
     pdf.bullet("Deploy stage: Runs only on main branch pushes (not pull requests). Installs the Railway CLI "
-               "and executes 'railway up --detach' using the RAILWAY_TOKEN secret stored in GitHub.")
+               "and executes 'railway up --detach' using the RAILWAY_TOKEN secret stored in GitHub Secrets.")
     pdf.body_text(
-        "Additionally, Railway itself monitors the GitHub repository and automatically rebuilds and "
+        "Additionally, Railway monitors the linked GitHub repository and automatically rebuilds and "
         "redeploys the application on every push to main, providing a second layer of CI/CD. "
-        "This dual approach ensures that broken code never reaches production (GitHub Actions gates the tests) "
-        "while Railway handles the actual infrastructure deployment."
+        "This dual approach ensures that broken code is caught by tests before production, "
+        "while Railway handles the actual infrastructure deployment seamlessly."
+    )
+    pdf.body_text(
+        f"GitHub repository: {GITHUB_URL}"
     )
 
     # ---- 5. Monitoring & Logging ----
@@ -188,36 +217,51 @@ def build_report():
         "(timestamp, level, module, message). Key events logged include: "
         "database operations (create/update/delete with record IDs), "
         "error conditions (400 bad requests with path info, 404 not-found, 500 internal errors), "
-        "and database health check failures."
+        "and database health check failures. Logs are streamed to Railway's real-time log viewer."
     )
 
-    pdf.subsection_title("5.2 Debugging Example")
+    pdf.subsection_title("5.2 Debugging Challenges Encountered")
     pdf.body_text(
-        "During deployment, Railway logs revealed a critical database connection error: "
-        "the DATABASE_URL provided by Railway used the prefix 'postgres://' while SQLAlchemy 2.x "
-        "requires 'postgresql://'. The application logs showed:"
+        "Challenge 1 - PermissionError on SQLite path: The non-root container user (appuser) could not "
+        "create Flask-SQLAlchemy's default /app/instance/ directory. Railway logs showed:"
     )
     pdf.set_font("Courier", "", 8.5)
     pdf.set_text_color(180, 40, 40)
     pdf.multi_cell(0, 4.5,
-        "  sqlalchemy.exc.NoSuchModuleError: Can't load plugin:\n"
-        "  sqlalchemy.dialects:postgres"
+        "  PermissionError: [Errno 13] Permission denied: '/app/instance'\n"
+        "  Worker failed to boot."
     )
     pdf.ln(2)
     pdf.set_font("Helvetica", "", 10)
     pdf.set_text_color(50, 50, 50)
     pdf.body_text(
-        "Resolution: Added a prefix replacement in main.py that converts 'postgres://' to "
-        "'postgresql://' before passing the URL to SQLAlchemy. This is a well-known Railway/Heroku "
-        "compatibility issue. The fix was verified by checking the /health endpoint's database "
-        "status field, which changed from 'error' to 'connected' after redeployment."
+        "Resolution: Changed the SQLite fallback path from 'sqlite:///local.db' (relative, creates "
+        "under /app/instance/) to 'sqlite:////tmp/local.db' (absolute, /tmp is writable by all users). "
+        "Verified via /health endpoint showing database: 'connected'."
+    )
+    pdf.body_text(
+        "Challenge 2 - PORT variable not expanding: Railway's startCommand in railway.json does not "
+        "run through a shell, so $PORT and ${PORT:-8080} were passed as literal strings. Logs showed:"
+    )
+    pdf.set_font("Courier", "", 8.5)
+    pdf.set_text_color(180, 40, 40)
+    pdf.multi_cell(0, 4.5,
+        "  Error: '$PORT' is not a valid port number."
+    )
+    pdf.ln(2)
+    pdf.set_font("Helvetica", "", 10)
+    pdf.set_text_color(50, 50, 50)
+    pdf.body_text(
+        "Resolution: Removed the startCommand from railway.json entirely, letting the Dockerfile's shell-form "
+        "CMD handle PORT expansion. The Dockerfile CMD runs via /bin/sh -c, which properly expands "
+        "environment variables. Health check passed after this fix."
     )
 
     pdf.subsection_title("5.3 Health Check Monitoring")
     pdf.body_text(
         "The /health endpoint returns JSON with application status, timestamp, region, and database "
-        "connectivity status. Railway's built-in health check (configured in railway.json) polls this "
-        "endpoint every 30 seconds and automatically restarts the container if it fails, providing "
+        "connectivity status. Railway's built-in health check (configured in railway.json with 120s timeout) "
+        "polls this endpoint and automatically restarts the container on failure, providing "
         "zero-downtime monitoring."
     )
 
@@ -252,7 +296,7 @@ def build_report():
         "support, and a superior dashboard with real-time log streaming. Heroku remains a mature "
         "platform with a larger ecosystem of add-ons but has fallen behind in pricing competitiveness "
         "since removing its free tier in 2022. For this project, Railway was chosen for its seamless "
-        "Docker deployment, one-click PostgreSQL provisioning, and transparent usage-based billing "
+        "Docker deployment, instant PostgreSQL provisioning, and transparent usage-based billing "
         "that suits educational and small-scale projects."
     )
 
@@ -263,14 +307,19 @@ def build_report():
         "modern PaaS platform. Key takeaways include:"
     )
     pdf.bullet("PaaS platforms like Railway abstract away infrastructure management, allowing developers "
-               "to focus on application logic. Provisioning a managed PostgreSQL database took seconds "
-               "compared to hours of manual setup on IaaS.")
+               "to focus on application logic. The entire deployment -- from project creation to a live "
+               "public URL -- took under 10 minutes using the Railway CLI.")
     pdf.bullet("Environment variable management is critical for security. Railway's dashboard-based "
-               "approach ensures secrets never touch version control.")
-    pdf.bullet("CI/CD integration provides confidence in deployments. The GitHub Actions pipeline catches "
-               "errors before they reach production, while Railway handles zero-downtime deployments.")
-    pdf.bullet("Container portability proved valuable - the same Dockerfile that ran on Google App Engine "
-               "deployed to Railway with minimal configuration changes (primarily the PORT variable).")
+               "approach ensures secrets never touch version control, while the CLI enables rapid "
+               "iteration during development.")
+    pdf.bullet("Real debugging experience was gained: the PermissionError and PORT expansion issues "
+               "required reading Railway's real-time logs, diagnosing root causes, and iterating fixes. "
+               "This mirrors real-world cloud debugging workflows.")
+    pdf.bullet("Container portability proved valuable -- the same Dockerfile that ran on Google App Engine "
+               "and HuggingFace Spaces deployed to Railway with minimal changes (PORT handling and "
+               "file path permissions for the non-root user).")
+    pdf.bullet("CI/CD integration via GitHub Actions provides confidence in deployments. The pipeline "
+               "catches errors before they reach production, while Railway handles zero-downtime deploys.")
     pdf.bullet("Usage-based pricing aligns costs with actual consumption, making PaaS economically viable "
                "for educational projects and startups that experience variable traffic patterns.")
 

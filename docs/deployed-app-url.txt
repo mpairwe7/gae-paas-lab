@@ -4,17 +4,18 @@
 
 --- Railway Deployment ---
 Platform     : Railway (PaaS)
+Project      : remarkable-happiness
 Runtime      : Python 3.13 / Docker / Gunicorn
-Database     : Railway-managed PostgreSQL
+Database     : SQLite (Railway free plan); PostgreSQL-ready
 
-Application URL       : https://<your-app>.up.railway.app
-Health Check          : https://<your-app>.up.railway.app/health
-Greeting Page         : https://<your-app>.up.railway.app/greet
-Sentiment API (POST)  : https://<your-app>.up.railway.app/api/analyse
-Sentiment Logs (CRUD) : https://<your-app>.up.railway.app/logs
-Logs API (JSON)       : https://<your-app>.up.railway.app/api/logs
+Application URL       : https://remarkable-happiness-production.up.railway.app
+Health Check          : https://remarkable-happiness-production.up.railway.app/health
+Greeting Page         : https://remarkable-happiness-production.up.railway.app/greet
+Sentiment API (POST)  : https://remarkable-happiness-production.up.railway.app/api/analyse
+Sentiment Logs (CRUD) : https://remarkable-happiness-production.up.railway.app/logs
+Logs API (JSON)       : https://remarkable-happiness-production.up.railway.app/api/logs
 
-Source Code : https://github.com/<your-username>/gae-paas-lab
+Source Code : https://github.com/mpairwe7/gae-paas-lab
 
 --- Previous GAE Deployment ---
 Platform     : Google App Engine (Standard Environment)
@@ -26,5 +27,5 @@ Greeting         : https://paas-lab-2026.as.r.appspot.com/greet
 API              : https://paas-lab-2026.as.r.appspot.com/api/analyse
 
 ============================================================
-  Deployment verified: 2026-04-03
+  Deployment verified: 2026-04-03  |  Status: SERVING
 ============================================================
