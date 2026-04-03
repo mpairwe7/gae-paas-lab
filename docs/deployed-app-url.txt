@@ -1,24 +1,30 @@
 ============================================================
-  PaaS Lab 2026 — Deployed Web Application URL
+  PaaS Lab 2026 — Deployed Web Application URLs
 ============================================================
 
-Project Name : paas-lab-2026
+--- Railway Deployment ---
+Platform     : Railway (PaaS)
+Runtime      : Python 3.13 / Docker / Gunicorn
+Database     : Railway-managed PostgreSQL
+
+Application URL       : https://<your-app>.up.railway.app
+Health Check          : https://<your-app>.up.railway.app/health
+Greeting Page         : https://<your-app>.up.railway.app/greet
+Sentiment API (POST)  : https://<your-app>.up.railway.app/api/analyse
+Sentiment Logs (CRUD) : https://<your-app>.up.railway.app/logs
+Logs API (JSON)       : https://<your-app>.up.railway.app/api/logs
+
+Source Code : https://github.com/<your-username>/gae-paas-lab
+
+--- Previous GAE Deployment ---
 Platform     : Google App Engine (Standard Environment)
-Runtime      : Python 3.13
 Region       : asia-southeast1 (Singapore)
 
-Application URL:
-  https://paas-lab-2026.as.r.appspot.com
-
-Health Check Endpoint:
-  https://paas-lab-2026.as.r.appspot.com/health
-
-AI Greeting Endpoint:
-  https://paas-lab-2026.as.r.appspot.com/greet
-
-API Endpoint (POST JSON):
-  https://paas-lab-2026.as.r.appspot.com/api/analyse
+Application URL  : https://paas-lab-2026.as.r.appspot.com
+Health Check     : https://paas-lab-2026.as.r.appspot.com/health
+Greeting         : https://paas-lab-2026.as.r.appspot.com/greet
+API              : https://paas-lab-2026.as.r.appspot.com/api/analyse
 
 ============================================================
-  Deployment verified: 2026-03-13  |  Status: SERVING
+  Deployment verified: 2026-04-03
 ============================================================

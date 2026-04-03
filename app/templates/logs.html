@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Logs - PaaS Lab 2026</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        nav {
+            display: flex; justify-content: center; gap: 2rem; padding: 1rem;
+            background: rgba(30,41,59,0.9); border-bottom: 1px solid rgba(99,102,241,0.2);
+            position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px);
+        }
+        nav a {
+            color: #94a3b8; text-decoration: none; font-size: 0.9rem; font-weight: 500;
+            display: flex; align-items: center; gap: 0.4rem; transition: color 0.2s;
+        }
+        nav a:hover, nav a.active { color: #a5b4fc; }
+
+        .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+        .page-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 2rem;
+        }
+        .page-header h1 { font-size: 1.8rem; font-weight: 700; color: #f1f5f9; }
+        .page-header h1 i { color: #a5b4fc; margin-right: 0.5rem; }
+        .count-badge {
+            background: rgba(99,102,241,0.15); color: #a5b4fc; padding: 0.35rem 0.85rem;
+            border-radius: 999px; font-size: 0.85rem; font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center; padding: 4rem 2rem;
+            color: #64748b;
+        }
+        .empty-state i { font-size: 3rem; margin-bottom: 1rem; display: block; color: #475569; }
+        .empty-state p { margin-bottom: 1.5rem; }
+        .empty-state a {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.7rem 1.5rem; background: #6366f1; color: #fff;
+            text-decoration: none; border-radius: 0.6rem; font-weight: 600;
+            transition: background 0.2s;
+        }
+        .empty-state a:hover { background: #4f46e5; }
+
+        .log-card {
+            background: rgba(30,41,59,0.7); border: 1px solid rgba(99,102,241,0.15);
+            border-radius: 0.85rem; padding: 1.25rem 1.5rem; margin-bottom: 1rem;
+            transition: border-color 0.2s;
+        }
+        .log-card:hover { border-color: rgba(99,102,241,0.4); }
+
+        .log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+        .log-id { color: #64748b; font-size: 0.8rem; font-weight: 600; }
+        .log-time { color: #64748b; font-size: 0.8rem; }
+
+        .sentiment-badge {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            padding: 0.2rem 0.65rem; border-radius: 999px;
+            font-size: 0.75rem; font-weight: 600;
+        }
+        .sentiment-badge.positive { background: rgba(34,197,94,0.15); color: #4ade80; }
+        .sentiment-badge.negative { background: rgba(244,63,94,0.15); color: #fb7185; }
+        .sentiment-badge.neutral { background: rgba(245,158,11,0.15); color: #fbbf24; }
+
+        .log-text { color: #e2e8f0; font-size: 0.95rem; margin-bottom: 0.5rem; }
+        .log-greeting { color: #94a3b8; font-size: 0.85rem; font-style: italic; }
+
+        .log-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+        .btn-sm {
+            padding: 0.35rem 0.75rem; border-radius: 0.4rem; font-size: 0.78rem;
+            font-weight: 600; border: none; cursor: pointer; display: inline-flex;
+            align-items: center; gap: 0.3rem; transition: all 0.2s;
+        }
+        .btn-edit { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+        .btn-edit:hover { background: rgba(99,102,241,0.3); }
+        .btn-delete { background: rgba(244,63,94,0.15); color: #fb7185; }
+        .btn-delete:hover { background: rgba(244,63,94,0.3); }
+
+        /* Edit modal */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            z-index: 100; align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: #1e293b; border: 1px solid rgba(99,102,241,0.3);
+            border-radius: 0.85rem; padding: 2rem; width: 90%; max-width: 480px;
+        }
+        .modal h2 { color: #f1f5f9; font-size: 1.2rem; margin-bottom: 1rem; }
+        .modal input {
+            width: 100%; padding: 0.75rem; background: #0f172a;
+            border: 1px solid rgba(99,102,241,0.3); border-radius: 0.5rem;
+            color: #e2e8f0; font-size: 0.95rem; margin-bottom: 1rem;
+        }
+        .modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; }
+        .btn-cancel { background: rgba(100,116,139,0.2); color: #94a3b8; }
+        .btn-save { background: #6366f1; color: #fff; }
+
+        footer {
+            text-align: center; padding: 2rem 1.5rem;
+            border-top: 1px solid rgba(99,102,241,0.1);
+            color: #475569; font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/"><i class="fa-solid fa-house"></i> Home</a>
+        <a href="/greet"><i class="fa-solid fa-comment-dots"></i> Greeting</a>
+        <a href="/logs" class="active"><i class="fa-solid fa-database"></i> Logs</a>
+        <a href="/health"><i class="fa-solid fa-heart-pulse"></i> Health</a>
+        <a href="/api/analyse"><i class="fa-solid fa-code"></i> API</a>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fa-solid fa-database"></i> Sentiment Logs</h1>
+            <span class="count-badge">{{ logs|length }} entries</span>
+        </div>
+
+        {% if logs %}
+            {% for log in logs %}
+            <div class="log-card" data-id="{{ log.id }}">
+                <div class="log-header">
+                    <span class="log-id">#{{ log.id }}</span>
+                    <span class="sentiment-badge {{ log.sentiment }}">
+                        <i class="fa-solid {% if log.sentiment == 'positive' %}fa-face-smile{% elif log.sentiment == 'negative' %}fa-face-frown{% else %}fa-face-meh{% endif %}"></i>
+                        {{ log.sentiment }}
+                    </span>
+                </div>
+                <div class="log-text"><i class="fa-solid fa-quote-left" style="color:#475569;margin-right:0.4rem;"></i>{{ log.input_text }}</div>
+                <div class="log-greeting">{{ log.greeting }}</div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.75rem;">
+                    <span class="log-time"><i class="fa-regular fa-clock"></i> {{ log.created_at.strftime('%Y-%m-%d %H:%M UTC') if log.created_at else 'N/A' }}</span>
+                    <div class="log-actions">
+                        <button class="btn-sm btn-edit" onclick="openEdit({{ log.id }}, '{{ log.input_text|e }}')">
+                            <i class="fa-solid fa-pen"></i> Edit
+                        </button>
+                        <button class="btn-sm btn-delete" onclick="deleteLog({{ log.id }})">
+                            <i class="fa-solid fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fa-solid fa-inbox"></i>
+                <p>No sentiment logs yet. Try the greeting feature to create some!</p>
+                <a href="/greet"><i class="fa-solid fa-wand-magic-sparkles"></i> Try Smart Greeting</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <h2><i class="fa-solid fa-pen" style="color:#a5b4fc;"></i> Edit Log Entry</h2>
+            <input type="text" id="editInput" placeholder="Enter new text..." maxlength="500">
+            <div class="modal-actions">
+                <button class="btn-sm btn-cancel" onclick="closeEdit()">Cancel</button>
+                <button class="btn-sm btn-save" onclick="saveEdit()">
+                    <i class="fa-solid fa-check"></i> Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>PaaS Lab 2026 &mdash; CRUD Operations with Railway-managed PostgreSQL</p>
+    </footer>
+
+    <script>
+        let editId = null;
+
+        function openEdit(id, text) {
+            editId = id;
+            document.getElementById('editInput').value = text;
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeEdit() {
+            editId = null;
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        function saveEdit() {
+            const text = document.getElementById('editInput').value.trim();
+            if (!text) return;
+            fetch(`/api/logs/${editId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ input_text: text })
+            }).then(r => { if (r.ok) location.reload(); else alert('Update failed'); });
+        }
+
+        function deleteLog(id) {
+            if (!confirm('Delete this log entry?')) return;
+            fetch(`/api/logs/${id}`, { method: 'DELETE' })
+                .then(r => { if (r.ok) location.reload(); else alert('Delete failed'); });
+        }
+    </script>
+</body>
+</html>

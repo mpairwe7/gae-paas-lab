@@ -17,6 +17,7 @@ COPY app/ .
 RUN adduser --disabled-password --no-create-home appuser
 USER appuser
 
-EXPOSE 7860
+EXPOSE ${PORT:-7860}
 
-CMD ["gunicorn", "-b", "0.0.0.0:7860", "main:app", "--workers", "2", "--threads", "4", "--timeout", "120"]
+# Railway sets PORT dynamically; fall back to 7860 for local dev
+CMD gunicorn -b 0.0.0.0:${PORT:-7860} main:app --workers 2 --threads 4 --timeout 120

@@ -1,0 +1,68 @@
+name: Deploy to Railway
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: pip install -r app/requirements.txt
+
+      - name: Run smoke test
+        run: |
+          cd app
+          python -c "
+          from main import app
+          client = app.test_client()
+          # Test health endpoint
+          resp = client.get('/health')
+          assert resp.status_code == 200, f'Health check failed: {resp.status_code}'
+          # Test landing page
+          resp = client.get('/')
+          assert resp.status_code == 200, f'Index failed: {resp.status_code}'
+          # Test greeting form
+          resp = client.get('/greet')
+          assert resp.status_code == 200, f'Greet form failed: {resp.status_code}'
+          # Test API docs
+          resp = client.get('/api/analyse')
+          assert resp.status_code == 200, f'API docs failed: {resp.status_code}'
+          # Test sentiment API
+          resp = client.post('/api/analyse', json={'text': 'I am happy'}, content_type='application/json')
+          assert resp.status_code == 200, f'API analyse failed: {resp.status_code}'
+          data = resp.get_json()
+          assert data['sentiment'] == 'positive', f'Wrong sentiment: {data}'
+          # Test logs page
+          resp = client.get('/logs')
+          assert resp.status_code == 200, f'Logs page failed: {resp.status_code}'
+          # Test CRUD - list logs API
+          resp = client.get('/api/logs')
+          assert resp.status_code == 200, f'API logs failed: {resp.status_code}'
+          print('All smoke tests passed!')
+          "
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm i -g @railway/cli
+
+      - name: Deploy to Railway
+        run: railway up --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
