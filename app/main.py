@@ -19,7 +19,7 @@ from markupsafe import escape
 app = Flask(__name__)
 
 # Database configuration — Railway injects DATABASE_URL automatically
-database_url = os.environ.get("DATABASE_URL", "sqlite:///local.db")
+database_url = os.environ.get("DATABASE_URL", "sqlite:////tmp/local.db")
 # Railway Postgres URLs use 'postgres://' but SQLAlchemy requires 'postgresql://'
 if database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
